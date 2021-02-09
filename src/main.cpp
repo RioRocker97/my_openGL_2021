@@ -83,23 +83,44 @@ int main(){
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	//create triangle
+	//create 2 triangle to form a square
 	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f,  0.5f, 0.0f
+		-0.5f,-0.5f,0.0f,
+    	-0.5f,0.5f,0.0f,
+       	0.5f,0.5f,0.0f,
+       	0.5f,-0.5f,0.0f,
+		-0.3f,-0.6f,0.0f,
+		-0.3f,-0.9f,0.0f,
+		0.3f,-0.6f,0.0f,
+		0.3f,-0.9f,0.0f, 
 	};
-	unsigned int VBO,VAO;
-	glGenBuffers(1,&VBO);
+	unsigned int combine[] ={
+		0,1,2,
+		0,2,3,
+		4,5,6,
+		5,6,7
+	};
+	unsigned int VBO,VAO,EBO;
 	glGenVertexArrays(1,&VAO);
+	glGenBuffers(1,&VBO);
+	glGenBuffers(1,&EBO);
 
 	glBindVertexArray(VAO);
 
+	//bind all vertexs
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
+	//bind combine vertexs
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(combine),combine,GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); 
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
@@ -109,15 +130,18 @@ int main(){
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES,0,3);
+		//glDrawArrays(GL_TRIANGLES,0,6);
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+
 
     	glfwSwapBuffers(mywin);
     	glfwPollEvents();    
 	}
 
-	glDeleteVertexArrays(1,&VAO);
-	glDeleteBuffers(1,&VBO);
-	glDeleteProgram(shaderProgram);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteProgram(shaderProgram);
 
 	glfwTerminate();
 	return 0;
