@@ -2,6 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <math.h>
+#include <string>
+
+#include <myShader/myshader.h>
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }  
@@ -14,22 +18,8 @@ void processInput(GLFWwindow *window)
 
 //simple GLSL for define position and diffuse color (fragment shader)
 //can specifiy variable for output to be used for other shader source 
-const char *vertexShaderSource = "#version 330 core\n"
-	"layout (location = 0) in vec3 aPos;\n"
-	"layout (location = 1) in vec3 baseColor;\n"
-	"out vec3 commonColor;\n"
-	"void main()\n"
-	"{\n"
-	"   gl_Position = vec4(aPos,1.0);\n"
-	"	commonColor = baseColor;\n"
-	"}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-	"in vec3 commonColor;"
-	"out vec4 FragColor;\n"
-	"void main()\n"
-	"{\n"
-	"	FragColor = vec4(commonColor,1.0);\n"
-	"}\0";
+// now moving shaderSource into seperate file
+
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
 	glfwInit();
@@ -51,43 +41,11 @@ int main(){
 	}
 
 	glViewport(0,0,800,600); //render area
-	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);  
-
-	//create vertex shader
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader,1,&vertexShaderSource,NULL);
-	glCompileShader(vertexShader);
-
-	//check vertexShader compiler 
-	int  success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if(!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s",infoLog);
-	}
-	//create fragment shader = fill shape with color
-	unsigned int fragmentShader,fragmentShader_purple;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	//create shader program for binding vertex and fragment shader
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	//check Link Program compiler
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if(!success) {
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s",infoLog);
-	}
-	//shader program linking is completed so delete shader for performance
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
+	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);
+	//now building shader from newly created Shader class
+	Shader simpleShader(
+		"C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\src\\shader\\simple.vert"
+		,"C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\src\\shader\\simple.frag");
 	//create pentagon
 	float mycube[]={
 		//position			//color
@@ -131,23 +89,15 @@ int main(){
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	//glBindVertexArray(0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // for drawing polygon line of the objects
+	printf("Now building this with seperate shader file . more managment needed.");
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
 
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
+		simpleShader.use();
 
-		// cycle color 
-		/*
-		float timeValue = glfwGetTime();
-		//printf("Time in GL : %.2f\n",timeValue);
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "baseColor");
-		glUniform3f(vertexColorLocation, 0.0f, greenValue, 0.0f);
-		*/
-		//
 		///try to cycle color for each verticle success !!
 		float timeValue = glfwGetTime();
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
@@ -168,7 +118,6 @@ int main(){
     glDeleteVertexArrays(2,VAO);
     glDeleteBuffers(2,VBO);
     glDeleteBuffers(2,EBO);
-    glDeleteProgram(shaderProgram);
 
 	glfwTerminate();
 	return 0;
