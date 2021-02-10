@@ -16,18 +16,19 @@ void processInput(GLFWwindow *window)
 //can specifiy variable for output to be used for other shader source 
 const char *vertexShaderSource = "#version 330 core\n"
 	"layout (location = 0) in vec3 aPos;\n"
-	"out vec4 commonColor;\n"
+	"layout (location = 1) in vec3 baseColor;\n"
+	"out vec3 commonColor;\n"
 	"void main()\n"
 	"{\n"
 	"   gl_Position = vec4(aPos,1.0);\n"
-	"	commonColor = vec4(0.63f,0.38f,0.11f,1.0f);\n"
+	"	commonColor = baseColor;\n"
 	"}\0";
 const char *fragmentShaderSource = "#version 330 core\n"
-	"uniform vec4 commonColor;"
+	"in vec3 commonColor;"
 	"out vec4 FragColor;\n"
 	"void main()\n"
 	"{\n"
-	"	FragColor = commonColor;\n"
+	"	FragColor = vec4(commonColor,1.0);\n"
 	"}\0";
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
@@ -89,11 +90,12 @@ int main(){
 
 	//create pentagon
 	float mycube[]={
-		-0.5f,-0.5f,0.0f,
-		-0.6f,0.0f,0.0f,
-		0.0f,0.5f,0.0f,
-		0.6f,0.0f,0.0f,
-		0.5f,-0.5f,0.0f
+		//position			//color
+		-0.3f,-0.5f,0.0f,	1.0f,0.0f,0.0f,
+		-0.4f,0.0f,0.0f,	0.0f,1.0f,0.0f,
+		0.0f,0.5f,0.0f,		0.0f,0.0f,1.0f,
+		0.4f,0.0f,0.0f,		0.0f,1.0f,0.0f,
+		0.3f,-0.5f,0.0f,	1.0f,0.0f,0.0f
 	};
 	unsigned int bundle[]={
 		0,1,2,
@@ -113,13 +115,17 @@ int main(){
 
 	//bind all vertexs
 	glBindBuffer(GL_ARRAY_BUFFER,VBO[0]);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(mycube),mycube,GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(mycube),mycube,GL_DYNAMIC_DRAW); //telling openGL that there will be VAO changed by passing GL_DYNAMIC_DRAW
 	//bind combine vertexs
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO[0]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(bundle),bundle,GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	//VAO for postion value
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
+	//VAO for color value
+	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3* sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	//glBindBuffer(GL_ARRAY_BUFFER, 0); 
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -133,13 +139,25 @@ int main(){
 
 		glUseProgram(shaderProgram);
 
-		// cycle color
+		// cycle color 
+		/*
 		float timeValue = glfwGetTime();
-		printf("Time in GL : %.2f\n",timeValue);
+		//printf("Time in GL : %.2f\n",timeValue);
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "commonColor");
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "baseColor");
+		glUniform3f(vertexColorLocation, 0.0f, greenValue, 0.0f);
+		*/
 		//
+		///try to cycle color for each verticle success !!
+		float timeValue = glfwGetTime();
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		mycube[4] = greenValue;
+		mycube[10] = greenValue;
+		mycube[16] = greenValue;
+		mycube[22] = greenValue;
+		mycube[28] = greenValue;
+		glBufferData(GL_ARRAY_BUFFER,sizeof(mycube),mycube,GL_DYNAMIC_DRAW);
+		///
 		glBindVertexArray(VAO[0]);
 		glDrawElements(GL_TRIANGLES,9, GL_UNSIGNED_INT, 0);
 

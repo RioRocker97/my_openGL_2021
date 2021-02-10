@@ -8,5 +8,5 @@
 
 - First Triangle 
 - first pentagon (with pulsing Color !)
-
+- Pulsing Pentagon (from each side)
 
