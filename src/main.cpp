@@ -20,7 +20,29 @@ void processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
-
+float change_texture(GLFWwindow *window,Shader shader,float rate){
+	if(glfwGetKey(window,GLFW_KEY_UP) == GLFW_PRESS){
+		if(rate <1.0f){
+			rate+= 0.0001f; //system respond to key so fast that it have to change with very very small amount.
+			shader.setFloat("blending_rate",rate);
+		}
+		else{
+			rate = 1.0f;
+			shader.setFloat("blending_rate",1.0f);
+		}
+	}
+	if(glfwGetKey(window,GLFW_KEY_DOWN) == GLFW_PRESS){
+		if(rate >0.0f){
+			rate-=0.0001f;
+			shader.setFloat("blending_rate",rate);
+		}
+		else{
+			rate = 0.0f;
+			shader.setFloat("blending_rate",0.0f);
+		}
+	}
+	return rate;
+}
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
 	glfwInit();
@@ -54,17 +76,18 @@ int main(){
 	Shader simpleShader_text(chr1,chr2);
 
 	// loading image texture
-	unsigned int face_texture;
-	glGenTextures(1,&face_texture);
-	glBindTexture(GL_TEXTURE_2D,face_texture);
+	unsigned int main_texture,decal_texture;
+	int w,h,nr;
+	std::string texture_path = MY_PATH;
+	//main texture
+	glGenTextures(1,&main_texture);
+	glBindTexture(GL_TEXTURE_2D,main_texture);
 
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	int w,h,nr;
-	std::string texture_path = MY_PATH;
 	texture_path.append("resource\\texture\\face.png");
 	chr1 = texture_path.c_str();
 	stbi_set_flip_vertically_on_load(true);  //call this function to load image properly (not upside-down)
@@ -75,6 +98,26 @@ int main(){
 	}
 	else printf("FAILED TO LOAD IMAGE TEXTURE\n");
 	stbi_image_free(texture_data);
+
+	//decal texture 
+
+	glGenTextures(1,&decal_texture);
+	glBindTexture(GL_TEXTURE_2D,decal_texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	texture_path.clear();
+	texture_path = MY_PATH;
+	texture_path.append("resource\\texture\\doge.png");
+	chr1 = texture_path.c_str();
+	unsigned char *texture_data2 = stbi_load(chr1,&w,&h,&nr,0); //loading another texture for texture unit dsb
+	if(texture_data2){
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w,h,0,GL_RGBA,GL_UNSIGNED_BYTE,texture_data2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else printf("FAILED TO LOAD IMAGE TEXTURE\n");
+	stbi_image_free(texture_data2);
 	//
 
 	//create pentagon
@@ -122,16 +165,26 @@ int main(){
 	//glBindBuffer(GL_ARRAY_BUFFER, 0); 
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	//glBindVertexArray(0);
-	printf("Now building this with seperate shader file . more managment needed.");
+	printf("Now building this with seperate shader file . more managment needed.\n");
+	printf("Press UP for decal blend in . Press Down for decal blend out.");
+	simpleShader_text.use();
+	simpleShader_text.setInt("myTexture1",0); //set texture unit for main
+	simpleShader_text.setInt("myTexture2",1); //set texture unit for decal
+	float rate = 0.3f;
+	simpleShader_text.setFloat("blending_rate",rate);
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
+		rate = change_texture(mywin,simpleShader_text,rate);
 
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		simpleShader_text.use();
 
-		glBindTexture(GL_TEXTURE_2D,face_texture);
+		glActiveTexture(GL_TEXTURE0); //texture unit. mutiple texture data in one common location
+		glBindTexture(GL_TEXTURE_2D,main_texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D,decal_texture);
 		glBindVertexArray(VAO[0]);
 		glDrawElements(GL_TRIANGLES,9, GL_UNSIGNED_INT, 0);
 
