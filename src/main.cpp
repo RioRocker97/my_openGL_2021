@@ -4,7 +4,12 @@
 #include <math.h>
 #include <string>
 
+#define STB_IMAGE_IMPLEMENTATION //don't know why we need this before calling image loader library. probably VScode thing.
+#include <stb_image.h>
+
 #include <myShader/myshader.h>
+
+#define MY_PATH "C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -15,10 +20,6 @@ void processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
-
-//simple GLSL for define position and diffuse color (fragment shader)
-//can specifiy variable for output to be used for other shader source 
-// now moving shaderSource into seperate file
 
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
@@ -43,17 +44,47 @@ int main(){
 	glViewport(0,0,800,600); //render area
 	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);
 	//now building shader from newly created Shader class
-	Shader simpleShader(
-		"C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\src\\shader\\simple.vert"
-		,"C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\src\\shader\\simple.frag");
+	std::string shader_path = MY_PATH;
+	std::string shader_path2 = MY_PATH;
+	shader_path.append("src\\shader\\simple_text.vert");
+	shader_path2.append("src\\shader\\simple_text.frag");
+	const char* chr1,* chr2;
+	chr1 = shader_path.c_str();
+	chr2 = shader_path2.c_str();
+	Shader simpleShader_text(chr1,chr2);
+
+	// loading image texture
+	unsigned int face_texture;
+	glGenTextures(1,&face_texture);
+	glBindTexture(GL_TEXTURE_2D,face_texture);
+
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int w,h,nr;
+	std::string texture_path = MY_PATH;
+	texture_path.append("resource\\texture\\face.png");
+	chr1 = texture_path.c_str();
+	stbi_set_flip_vertically_on_load(true);  //call this function to load image properly (not upside-down)
+	unsigned char *texture_data = stbi_load(chr1,&w,&h,&nr,0);
+	if(texture_data){
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w,h,0,GL_RGBA,GL_UNSIGNED_BYTE,texture_data); //.jpg,.jpeg use GL_RGB BUT .png use GL_RGBA coz it store different color value
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else printf("FAILED TO LOAD IMAGE TEXTURE\n");
+	stbi_image_free(texture_data);
+	//
+
 	//create pentagon
 	float mycube[]={
-		//position			//color
-		-0.3f,-0.5f,0.0f,	1.0f,0.0f,0.0f,
-		-0.4f,0.0f,0.0f,	0.0f,1.0f,0.0f,
-		0.0f,0.5f,0.0f,		0.0f,0.0f,1.0f,
-		0.4f,0.0f,0.0f,		0.0f,1.0f,0.0f,
-		0.3f,-0.5f,0.0f,	1.0f,0.0f,0.0f
+		//position			//color				//texture coordinate
+		-0.3f,-0.5f,0.0f,	1.0f,0.0f,0.0f,		0.3f,0.0f,
+		-0.4f,0.0f,0.0f,	0.0f,1.0f,0.0f,		0.0f,0.5f,
+		0.0f,0.5f,0.0f,		0.0f,0.0f,1.0f,		0.5f,1.0f,
+		0.4f,0.0f,0.0f,		0.0f,1.0f,0.0f,		1.0f,0.5f,
+		0.3f,-0.5f,0.0f,	1.0f,0.0f,0.0f,		0.7f,0.0f,
 	};
 	unsigned int bundle[]={
 		0,1,2,
@@ -79,16 +110,18 @@ int main(){
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(bundle),bundle,GL_STATIC_DRAW);
 
 	//VAO for postion value
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
 	//VAO for color value
-	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3* sizeof(float)));
+	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(3* sizeof(float)));
 	glEnableVertexAttribArray(1);
+	//VAO for texture cord. value
+	glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6* sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	//glBindBuffer(GL_ARRAY_BUFFER, 0); 
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	//glBindVertexArray(0);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // for drawing polygon line of the objects
 	printf("Now building this with seperate shader file . more managment needed.");
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
@@ -96,18 +129,9 @@ int main(){
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		simpleShader.use();
+		simpleShader_text.use();
 
-		///try to cycle color for each verticle success !!
-		float timeValue = glfwGetTime();
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		mycube[4] = greenValue;
-		mycube[10] = greenValue;
-		mycube[16] = greenValue;
-		mycube[22] = greenValue;
-		mycube[28] = greenValue;
-		glBufferData(GL_ARRAY_BUFFER,sizeof(mycube),mycube,GL_DYNAMIC_DRAW);
-		///
+		glBindTexture(GL_TEXTURE_2D,face_texture);
 		glBindVertexArray(VAO[0]);
 		glDrawElements(GL_TRIANGLES,9, GL_UNSIGNED_INT, 0);
 
@@ -118,6 +142,7 @@ int main(){
     glDeleteVertexArrays(2,VAO);
     glDeleteBuffers(2,VBO);
     glDeleteBuffers(2,EBO);
+	simpleShader_text.destroy();
 
 	glfwTerminate();
 	return 0;
