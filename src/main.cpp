@@ -7,6 +7,10 @@
 #define STB_IMAGE_IMPLEMENTATION //don't know why we need this before calling image loader library. probably VScode thing.
 #include <stb_image.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <myShader/myshader.h>
 
 #define MY_PATH "C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\";
@@ -68,12 +72,12 @@ int main(){
 	//now building shader from newly created Shader class
 	std::string shader_path = MY_PATH;
 	std::string shader_path2 = MY_PATH;
-	shader_path.append("src\\shader\\simple_text.vert");
+	shader_path.append("src\\shader\\simple_vec.vert");
 	shader_path2.append("src\\shader\\simple_text.frag");
 	const char* chr1,* chr2;
 	chr1 = shader_path.c_str();
 	chr2 = shader_path2.c_str();
-	Shader simpleShader_text(chr1,chr2);
+	Shader simpleShader_GLM(chr1,chr2);
 
 	// loading image texture
 	unsigned int main_texture,decal_texture;
@@ -167,19 +171,49 @@ int main(){
 	//glBindVertexArray(0);
 	printf("Now building this with seperate shader file . more managment needed.\n");
 	printf("Press UP for decal blend in . Press Down for decal blend out.");
-	simpleShader_text.use();
-	simpleShader_text.setInt("myTexture1",0); //set texture unit for main
-	simpleShader_text.setInt("myTexture2",1); //set texture unit for decal
+	simpleShader_GLM.use();
+	simpleShader_GLM.setInt("myTexture1",0); //set texture unit for main
+	simpleShader_GLM.setInt("myTexture2",1); //set texture unit for decal
 	float rate = 0.3f;
-	simpleShader_text.setFloat("blending_rate",rate);
+	simpleShader_GLM.setFloat("blending_rate",rate);
+
+	//using GLM to rotate and scale one time
+	using namespace glm;
+	/*mat4 trans = mat4(1.0f);
+	trans = rotate(trans,radians(90.0f),vec3(0.0,0.0,1.0));
+	trans = scale(trans,vec3(1.5,1.0,1.0));
+
+	simpleShader_GLM.setTransform("transform",value_ptr(trans));
+	*/
+	// using GLM to rotate constantly
+	mat4 trans = mat4(1.0f);
+	//trans = translate(trans,vec3(0.5f,0.5f,0.0f));
+	//trans = rotate(trans,(float)glfwGetTime(),vec3(0.0f,0.0f,1.0f));
+	float myrate = 0.0001;
+	bool toggle = true;
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
-		rate = change_texture(mywin,simpleShader_text,rate);
+		rate = change_texture(mywin,simpleShader_GLM,rate);
 
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		simpleShader_text.use();
+		//GLM rotate constantly
+		//float myrate = sin(glfwGetTime())/200.0;
+		//printf("myrate now : %.1f\n",myrate);
+		if(toggle && (int)glfwGetTime() % 5 == 0){
+			trans = translate(trans,vec3(-myrate,-myrate,0.0f));
+			toggle=false;
+		}
+		else{
+			trans = translate(trans,vec3(myrate,myrate,0.0f));
+			toggle=true;
+		}
+		//printf("myrate now : %.3f\n",myrate);
+		trans = rotate(trans,0.0005f,vec3(0.0f,0.0f,1.0f));
+		simpleShader_GLM.setTransform("transform",value_ptr(trans));
+		//
+		simpleShader_GLM.use();
 
 		glActiveTexture(GL_TEXTURE0); //texture unit. mutiple texture data in one common location
 		glBindTexture(GL_TEXTURE_2D,main_texture);
@@ -195,7 +229,7 @@ int main(){
     glDeleteVertexArrays(2,VAO);
     glDeleteBuffers(2,VBO);
     glDeleteBuffers(2,EBO);
-	simpleShader_text.destroy();
+	simpleShader_GLM.destroy();
 
 	glfwTerminate();
 	return 0;
