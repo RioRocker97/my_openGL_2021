@@ -11,6 +11,8 @@
 - Pulsing Pentagon (from each side)
 - 2D textured
 - 2D texture unit (mutiple texture in same texture location)(with key to change value !)
+- simple rotate and scale using vector
+- first 3D cube with static control (left,right)
 
 ### Library used
 

@@ -101,7 +101,7 @@ public:
     { 
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value); 
     }
-    void setTransform(const std::string &name,const GLfloat* value) const{
+    void setTransform(const std::string &name,const GLfloat* value){
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()),1,GL_FALSE,value);
     }
     void destroy()
