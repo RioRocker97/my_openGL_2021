@@ -4,15 +4,15 @@
 #include <math.h>
 #include <string>
 
-#define STB_IMAGE_IMPLEMENTATION //don't know why we need this before calling image loader library. probably VScode thing.
-#include <stb_image.h>
+//#define STB_IMAGE_IMPLEMENTATION //don't know why we need this before calling image loader library. probably VScode thing.
+//#include <stb_image.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <myShader/myshader.h>
-
+#include <myShader/mytexture.h>
 #define MY_PATH "C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\"
 #define MY_WIDTH 1280
 #define MY_HEIGHT 720
@@ -93,49 +93,10 @@ int main(){
 	chr2 = shader_path2.c_str();
 	Shader simpleShader_GLM(chr1,chr2);
 
-	// loading image texture
-	unsigned int main_texture,decal_texture;
-	int w,h,nr;
-	std::string texture_path = MY_PATH;
-	//main texture
-	glGenTextures(1,&main_texture);
-	glBindTexture(GL_TEXTURE_2D,main_texture);
+	// loading image texture using my own class
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	texture_path.append("resource\\texture\\mytile.jpg");
-	chr1 = texture_path.c_str();
-	//stbi_set_flip_vertically_on_load(true);  //call this function to load image properly (not upside-down)
-	unsigned char *texture_data = stbi_load(chr1,&w,&h,&nr,0);
-	if(texture_data){
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,w,h,0,GL_RGB,GL_UNSIGNED_BYTE,texture_data); //.jpg,.jpeg use GL_RGB BUT .png use GL_RGBA coz it store different color value
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else printf("FAILED TO LOAD IMAGE TEXTURE\n");
-	stbi_image_free(texture_data);
-
-	//decal texture 
-
-	glGenTextures(1,&decal_texture);
-	glBindTexture(GL_TEXTURE_2D,decal_texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	texture_path.clear();
-	texture_path = MY_PATH;
-	texture_path.append("resource\\texture\\doge.png");
-	chr1 = texture_path.c_str();
-	unsigned char *texture_data2 = stbi_load(chr1,&w,&h,&nr,0); //loading another texture for texture unit dsb
-	if(texture_data2){
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w,h,0,GL_RGBA,GL_UNSIGNED_BYTE,texture_data2);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else printf("FAILED TO LOAD IMAGE TEXTURE\n");
-	stbi_image_free(texture_data2);
+	Texture2D main_texture("mytile.jpg",false);
+	Texture2D decal_texture("doge.png",true);
 
 	// real 3D cube
 	float mycube[] = {
@@ -204,11 +165,16 @@ int main(){
 	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
 	printf("Press LEFT to go left (static). Press RIGHT to go right (static).\n");
 
-	simpleShader_GLM.use();
-	simpleShader_GLM.setInt("myTexture1",0); //set texture unit for main
-	simpleShader_GLM.setInt("myTexture2",1); //set texture unit for decal
+	simpleShader_GLM.use(); // put shader program before modify any uniform value
+
+	// set texture 
+	simpleShader_GLM.setInt("myTexture1",0);
+	simpleShader_GLM.setInt("myTexture2",1);
 	float rate = 0.01f;
 	simpleShader_GLM.setFloat("blending_rate",rate);
+
+	main_texture.myactivate(0);
+	decal_texture.myactivate(1);
 
 	//using GLM to set model,view,projection vector
 	mat4 model = mat4(1.0f);
@@ -225,11 +191,6 @@ int main(){
 
 	glEnable(GL_DEPTH_TEST);
 
-	glActiveTexture(GL_TEXTURE0); //texture unit. mutiple texture data in one common location
-	glBindTexture(GL_TEXTURE_2D,main_texture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D,decal_texture);
-
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
 		rate = change_texture(mywin,simpleShader_GLM,rate);
@@ -243,7 +204,7 @@ int main(){
 		simpleShader_GLM.use();
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES,0,36);
+		glDrawArrays(GL_TRIANGLES,0,37);
 
     	glfwSwapBuffers(mywin);
     	glfwPollEvents();    

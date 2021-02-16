@@ -17,3 +17,7 @@
 ### Library used
 
 - GLM , GLAD , GLFW 
+
+### my own header
+
+- mytexture.h for storing GLtexture (simple 2D image texture)
