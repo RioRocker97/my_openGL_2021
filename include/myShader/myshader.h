@@ -7,10 +7,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-/* 
-    just copy this from tutorial . will simplify later for better understanding
 
-*/
+#define SHADER_PATH "C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\src\\shader\\"
+
 class Shader
 {
 public:
@@ -19,6 +18,7 @@ public:
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath)
     {
+        std::string full_path = SHADER_PATH;
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;
@@ -30,20 +30,15 @@ public:
         try 
         {
             // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
+            vShaderFile.open(full_path.append(vertexPath).c_str());
+            full_path.clear();
+            full_path = SHADER_PATH;
+            fShaderFile.open(full_path.append(fragmentPath).c_str());
             std::stringstream vShaderStream, fShaderStream;
             // read file's buffer contents into streams
             vShaderStream << vShaderFile.rdbuf();
             fShaderStream << fShaderFile.rdbuf();
-            /*
-            if(vShaderFile.is_open() && fShaderFile.is_open()){
-                
-                std::cout<<vShaderStream.str()<<std::endl;
-                std::cout<<"---------------------------\n";
-                std::cout<<fShaderStream.str()<<std::endl;
-            }
-            */
+
             // close file handlers
             vShaderFile.close();
             fShaderFile.close();

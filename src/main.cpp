@@ -4,16 +4,13 @@
 #include <math.h>
 #include <string>
 
-//#define STB_IMAGE_IMPLEMENTATION //don't know why we need this before calling image loader library. probably VScode thing.
-//#include <stb_image.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <myShader/myshader.h>
 #include <myShader/mytexture.h>
-#define MY_PATH "C:\\Users\\ChangNoi_V2\\Desktop\\Covid-19 shit\\openGL_again\\main_app\\"
+
 #define MY_WIDTH 1280
 #define MY_HEIGHT 720
 
@@ -83,16 +80,8 @@ int main(){
 
 	glViewport(0,0,MY_WIDTH,MY_HEIGHT); //render area
 	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);
-	//now building shader from newly created Shader class
-	std::string shader_path = MY_PATH;
-	std::string shader_path2 = MY_PATH;
-	shader_path.append("src\\shader\\simple_3D_space.vert");
-	shader_path2.append("src\\shader\\simple_3D_space.frag");
-	const char* chr1,* chr2;
-	chr1 = shader_path.c_str();
-	chr2 = shader_path2.c_str();
-	Shader simpleShader_GLM(chr1,chr2);
-
+	//now building shader from newly created Shader class (with path defined)
+	Shader simpleShader_GLM("simple_3D_space.vert","simple_3D_space.frag");
 	// loading image texture using my own class
 
 	Texture2D main_texture("mytile.jpg",false);
