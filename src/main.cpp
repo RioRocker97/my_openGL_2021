@@ -16,9 +16,16 @@
 
 using namespace glm;
 
-float myX = 0.0f;
-float myY = 0.1f;
-float myZ = -20.0f;
+vec3 cameraPos   = vec3(5.0f, 0.0f,  -20.0f);
+vec3 cameraFront = vec3(0.0f, 0.0f, 1.0f);
+vec3 cameraUp    = vec3(0.0f, 1.0f, 0.0f); //only adjust Y coz it UP
+
+bool firstMouse = true;
+float rotateY   = 90.0f;	// rotateY is initialized to -90.0 degrees since a rotateY of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float rotateZ =  0.0f;
+float lastX =  1280.0/ 2.0;
+float lastY =  720.0 / 2.0;
+float fov   =  55.0f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -57,28 +64,66 @@ void setDiffuse(GLFWwindow *window,Texture2D text){
 void setDiffuse2(GLFWwindow *window,Texture2D text){
 	if(glfwGetKey(window,GLFW_KEY_Q) == GLFW_PRESS)text.myactivate(0);
 }
-void walkAround(GLFWwindow *window,float speed){
-	if(glfwGetKey(window,GLFW_KEY_W) == GLFW_PRESS){
-		if(myZ <= -5.0f )myZ += speed;
-	}
-	else if(glfwGetKey(window,GLFW_KEY_S) == GLFW_PRESS){
-		if(myZ >= -30.0f) myZ -= speed;
-	}
-	else if(glfwGetKey(window,GLFW_KEY_A) == GLFW_PRESS){
-		if(myX <= 5.0f) myX += speed;
-	}
-	else if(glfwGetKey(window,GLFW_KEY_D) == GLFW_PRESS){
-		if(myX >= -30.0f) myX -= speed;
-	}
+void walkAround(GLFWwindow *window){
+    float cameraSpeed = 0.001f; 
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+		firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.8f; // change this value to your liking
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    rotateY += xoffset;
+    rotateZ += yoffset;
+
+    // make sure that when rotateZ is out of bounds, screen doesn't get flipped
+    if (rotateZ > 89.0f)
+        rotateZ = 89.0f;
+    if (rotateZ < -89.0f)
+        rotateZ = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(rotateY)) * cos(glm::radians(rotateZ));
+    front.y = sin(glm::radians(rotateZ));
+    front.z = cos(glm::radians(rotateZ)) * sin(glm::radians(rotateY));
+    cameraFront = glm::normalize(front);
+
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    fov -= (float)yoffset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 55.0f)
+        fov = 55.0f;
 }
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
 	glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
 
-	GLFWwindow* mywin = glfwCreateWindow(MY_WIDTH,MY_HEIGHT,"GLFW window",NULL,NULL); //window area
+	GLFWwindow* mywin = glfwCreateWindow(MY_WIDTH,MY_HEIGHT,"CHANG window",NULL,NULL); //window area
 	if(mywin == NULL){
 		printf("Can't create GLFW window");
 		glfwTerminate();
@@ -91,9 +136,13 @@ int main(){
 		return -1;
 	}
 
-	glViewport(0,0,MY_WIDTH,MY_HEIGHT); //render area
+	// mouse and scroll callback
 	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);
-	//now building shader from newly created Shader class (with path defined)
+    glfwSetCursorPosCallback(mywin, mouse_callback);
+    glfwSetScrollCallback(mywin, scroll_callback);
+
+	glfwSetInputMode(mywin, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	Shader simpleShader_GLM("simple_3D_space.vert","simple_3D_space.frag");
 	// loading image texture using my own class
 
@@ -248,6 +297,8 @@ int main(){
 		vec3(-25.5f,3.3f,0.0f),
 		vec3(-24.4f,3.3f,0.0f),
 		vec3(-24.4f,2.2f,0.0f),
+		// test mouse
+		vec3(0.0f,0.0f,-30.0f)
 	};
 	/* VBO = vertices Buffer Object . for storing vertice info to GPU buffer
 	VA0 = vertics Array Object . for sotring vertice info newly created
@@ -280,9 +331,6 @@ int main(){
 	decal_texture.myactivate(1);
 
 	//using GLM to set model,view,projection vector
-	mat4 project;
-	project = perspective(radians(55.0f),(float)MY_WIDTH /(float)MY_HEIGHT,0.1f,100.0f);
-	simpleShader_GLM.setTransform("projection",value_ptr(project));
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -290,27 +338,27 @@ int main(){
 	printf("Now building this with seperate shader file . more managment needed.\n");
 	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
 	printf("Press E and Q to swap main texture\n");
-	printf("NOW you can walk (my implementation) WASD !!!\n");
+	printf("NOW you can walk (tutorial implementation) WASD !!!\n");
 	printf("---------------------------------------------------------------------\n");
 
-	while(!glfwWindowShouldClose(mywin)){
+	while(!glfwWindowShouldClose(mywin)){ 
 		processInput(mywin);
 		rate = change_texture(mywin,simpleShader_GLM,rate);
 		setDiffuse(mywin,main2_texture);
 		setDiffuse2(mywin,main_texture);
-		walkAround(mywin,0.003f);
-
+		walkAround(mywin);
 
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
 		simpleShader_GLM.use();
 
-        mat4 view = mat4(1.0f); // set starting point
-        view = lookAt(vec3(myX,myY,myZ),vec3(myX, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
+		mat4 project = perspective(radians(fov),(float)MY_WIDTH /(float)MY_HEIGHT,0.1f,100.0f);
+		simpleShader_GLM.setTransform("projection",value_ptr(project));
+        mat4 view = lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         simpleShader_GLM.setTransform("view",value_ptr(view));
 
-		for(int i =0;i<87;i++){
+		for(int i =0;i<88;i++){
 			mat4 model = mat4(1.0f);
             model = translate(model, allCube[i]);
             simpleShader_GLM.setTransform("model",value_ptr(model));
