@@ -13,7 +13,7 @@
 - 2D texture unit (mutiple texture in same texture location)(with key to change value !)
 - simple rotate and scale using vector
 - first 3D cube with static control (left,right)
-
+- create camera (using model,view,projection matrix)
 ### Library used
 
 - GLM , GLAD , GLFW 

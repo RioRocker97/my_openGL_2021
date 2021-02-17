@@ -48,15 +48,11 @@ float change_texture(GLFWwindow *window,Shader shader,float rate){
 	}
 	return rate;
 }
-void move_cube(GLFWwindow *window,Shader shader,mat4 v){
-	if(glfwGetKey(window,GLFW_KEY_LEFT) == GLFW_PRESS){
-		v = translate(v,vec3(-2.0f,0.0f,0.0f));
-		shader.setTransform("view",value_ptr(v));
-	}
-	else if(glfwGetKey(window,GLFW_KEY_RIGHT) == GLFW_PRESS){
-		v = translate(v,vec3(2.0f,0.0f,0.0f));
-		shader.setTransform("view",value_ptr(v));
-	}
+void setDiffuse(GLFWwindow *window,Texture2D text){
+	if(glfwGetKey(window,GLFW_KEY_E) == GLFW_PRESS)text.myactivate(0);
+}
+void setDiffuse2(GLFWwindow *window,Texture2D text){
+	if(glfwGetKey(window,GLFW_KEY_Q) == GLFW_PRESS)text.myactivate(0);
 }
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
@@ -86,7 +82,7 @@ int main(){
 
 	Texture2D main_texture("mytile.jpg",false);
 	Texture2D decal_texture("doge.png",true);
-
+	Texture2D main2_texture("colorful.jpg",false);
 	// real 3D cube
 	float mycube[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -131,6 +127,111 @@ int main(){
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
+	vec3 allCube[] = {
+		//C
+		vec3( 0.0f,  0.0f,  0.0f),
+        vec3( 1.1f,  0.0f,  0.0f),
+		vec3( 2.2f,  0.0f,  0.0f),
+		vec3( 3.3f,  0.0f,  0.0f),
+		vec3( 4.4f,  0.0f,  0.0f),
+		vec3( 4.4f,  1.1f,  0.0f),
+        vec3( 4.4f,  2.2f,  0.0f),
+		vec3( 4.4f,  3.3f,  0.0f),
+		vec3( 4.4f,  4.4f,  0.0f),
+		vec3( 4.4f,  5.5f,  0.0f),
+		vec3( 3.3f,  5.5f,  0.0f),
+		vec3( 2.2f,  5.5f,  0.0f),
+		vec3( 1.1f,  5.5f,  0.0f),
+		vec3( 0.0f,  5.5f,  0.0f),
+		//H
+		vec3(-2.0f,0.0f,0.0f),
+		vec3(-2.0f,1.1f,0.0f),
+		vec3(-2.0f,2.2f,0.0f),
+		vec3(-2.0f,3.3f,0.0f),
+		vec3(-2.0f,4.4f,0.0f),
+		vec3(-2.0f,5.5f,0.0f),
+
+		vec3(-3.1f,3.0f,0.0f),
+		vec3(-4.2f,3.0f,0.0f),
+		vec3(-5.2f,3.0f,0.0f),
+
+		vec3(-6.3f,0.0f,0.0f),
+		vec3(-6.3f,1.1f,0.0f),
+		vec3(-6.3f,2.2f,0.0f),
+		vec3(-6.3f,3.3f,0.0f),
+		vec3(-6.3f,4.4f,0.0f),
+		vec3(-6.3f,5.5f,0.0f),
+		//A
+		vec3(-7.5f,0.0f,0.0f),
+		vec3(-7.5f,1.1f,0.0f),
+		vec3(-7.5f,2.2f,0.0f),
+		vec3(-7.5f,3.3f,0.0f),
+		vec3(-7.5f,4.4f,0.0f),
+		vec3(-7.5f,5.5f,0.0f),
+
+		vec3(-8.6f,5.5f,0.0f),
+		vec3(-9.7f,5.5f,0.0f),
+		vec3(-10.8f,5.5f,0.0f),
+
+		vec3(-8.6f,3.0f,0.0f),
+		vec3(-9.7f,3.0f,0.0f),
+		vec3(-10.8f,3.0f,0.0f),
+
+		vec3(-11.9f,5.5f,0.0f),
+		vec3(-11.9f,4.4f,0.0f),
+		vec3(-11.9f,3.3f,0.0f),
+		vec3(-11.9f,2.2f,0.0f),
+		vec3(-11.9f,1.1f,0.0f),
+		vec3(-11.9f,0.0f,0.0f),
+		//N
+		vec3(-14.0f,0.0f,0.0f),
+		vec3(-14.0f,1.1f,0.0f),
+		vec3(-14.0f,2.2f,0.0f),
+		vec3(-14.0f,3.3f,0.0f),
+		vec3(-14.0f,4.4f,0.0f),
+		vec3(-14.0f,5.5f,0.0f),
+
+		vec3(-15.1f,4.0f,0.0f),
+		vec3(-16.2f,3.0f,0.0f),
+		vec3(-17.3f,2.0f,0.0f),
+		vec3(-18.4f,1.0f,0.0f),
+		vec3(-19.5f,0.0f,0.0f),
+
+		vec3(-20.6f,0.0f,0.0f),
+		vec3(-20.6f,1.1f,0.0f),
+		vec3(-20.6f,2.2f,0.0f),
+		vec3(-20.6f,3.3f,0.0f),
+		vec3(-20.6f,4.4f,0.0f),
+		vec3(-20.6f,5.5f,0.0f),
+		//G
+		vec3(-22.2f,0.0f,0.0f),
+		vec3(-22.2f,1.1f,0.0f),
+		vec3(-22.2f,2.2f,0.0f),
+		vec3(-22.2f,3.3f,0.0f),
+		vec3(-22.2f,4.4f,0.0f),
+		vec3(-22.2f,5.5f,0.0f),
+
+		vec3(-23.3f,5.5f,0.0f),
+		vec3(-24.4f,5.5f,0.0f),
+		vec3(-25.5f,5.5f,0.0f),
+		vec3(-26.6f,5.5f,0.0f),
+		vec3(-27.7f,5.5f,0.0f),
+
+		vec3(-23.3f,0.0f,0.0f),
+		vec3(-24.4f,0.0f,0.0f),
+		vec3(-25.5f,0.0f,0.0f),
+		vec3(-26.6f,0.0f,0.0f),
+		vec3(-27.7f,0.0f,0.0f),
+
+		vec3(-27.7f,1.1f,0.0f),
+		vec3(-27.7f,2.2f,0.0f),
+		vec3(-27.7f,3.3f,0.0f),
+
+		vec3(-26.6f,3.3f,0.0f),
+		vec3(-25.5f,3.3f,0.0f),
+		vec3(-24.4f,3.3f,0.0f),
+		vec3(-24.4f,2.2f,0.0f),
+	};
 	/* VBO = vertices Buffer Object . for storing vertice info to GPU buffer
 	VA0 = vertics Array Object . for sotring vertice info newly created
 	EBO =Elemental Buffer Object . for combining VBO into a new shape
@@ -150,10 +251,6 @@ int main(){
 	glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)(3*sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	printf("Now building this with seperate shader file . more managment needed.\n");
-	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
-	printf("Press LEFT to go left (static). Press RIGHT to go right (static).\n");
-
 	simpleShader_GLM.use(); // put shader program before modify any uniform value
 
 	// set texture 
@@ -166,34 +263,46 @@ int main(){
 	decal_texture.myactivate(1);
 
 	//using GLM to set model,view,projection vector
-	mat4 model = mat4(1.0f);
-	mat4 view = mat4(1.0f);
-	mat4 project = mat4(1.0f);
-	
-	model = rotate(model,radians(30.0f),vec3(1.0f,0.0f,0.0f));
-	view = translate(view,vec3(0.0f,0.3f,-5.0f));
-	project = perspective(radians(45.0f),(float)MY_WIDTH /(float)MY_HEIGHT,0.1f,100.0f);
-
-	simpleShader_GLM.setTransform("model",value_ptr(model));
-	simpleShader_GLM.setTransform("view",value_ptr(view));
+	mat4 project;
+	project = perspective(radians(55.0f),(float)MY_WIDTH /(float)MY_HEIGHT,0.1f,100.0f);
 	simpleShader_GLM.setTransform("projection",value_ptr(project));
 
 	glEnable(GL_DEPTH_TEST);
 
+	printf("---------------------------------------------------------------------\n");
+	printf("Now building this with seperate shader file . more managment needed.\n");
+	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
+	printf("Press E and Q to swap main texture\n");
+	printf("---------------------------------------------------------------------\n");
+
 	while(!glfwWindowShouldClose(mywin)){
 		processInput(mywin);
 		rate = change_texture(mywin,simpleShader_GLM,rate);
-		move_cube(mywin,simpleShader_GLM,view);
+		setDiffuse(mywin,main2_texture);
+		setDiffuse2(mywin,main_texture);
 
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-		model = rotate(model,0.0002f, vec3(0.0f,1.0f, 0.0f));
-		simpleShader_GLM.setTransform("model",value_ptr(model));
 		simpleShader_GLM.use();
 
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES,0,37);
+        mat4 view = mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        float radius = 25.0f;
+        float camX   = sin(glfwGetTime()/2.0) * radius ;
+        float camZ   = cos(glfwGetTime()/2.0) * radius ;
+        view = lookAt(vec3(camX,5.0f,camZ),vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 3.0f, 0.0f));
+		//view = rotate(view,radians(-180.0f),vec3(0.0f,1.0f,0.0f));
+        simpleShader_GLM.setTransform("view",value_ptr(view));
+
+		for(int i =0;i<87;i++){
+			mat4 model = mat4(1.0f);
+            model = translate(model, allCube[i]);
+			model = translate(model,vec3(10.0f,-1.0f,0.0f));
+			//model = rotate(model,radians(20.0f),vec3(1.0f,0.0f,0.0f));
+            simpleShader_GLM.setTransform("model",value_ptr(model));
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
     	glfwSwapBuffers(mywin);
     	glfwPollEvents();    
