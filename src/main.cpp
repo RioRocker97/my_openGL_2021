@@ -16,11 +16,14 @@
 
 using namespace glm;
 
+float myX = 0.0f;
+float myY = 0.1f;
+float myZ = -20.0f;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }  
 void processInput(GLFWwindow *window)
-
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -53,6 +56,20 @@ void setDiffuse(GLFWwindow *window,Texture2D text){
 }
 void setDiffuse2(GLFWwindow *window,Texture2D text){
 	if(glfwGetKey(window,GLFW_KEY_Q) == GLFW_PRESS)text.myactivate(0);
+}
+void walkAround(GLFWwindow *window,float speed){
+	if(glfwGetKey(window,GLFW_KEY_W) == GLFW_PRESS){
+		if(myZ <= -5.0f )myZ += speed;
+	}
+	else if(glfwGetKey(window,GLFW_KEY_S) == GLFW_PRESS){
+		if(myZ >= -30.0f) myZ -= speed;
+	}
+	else if(glfwGetKey(window,GLFW_KEY_A) == GLFW_PRESS){
+		if(myX <= 5.0f) myX += speed;
+	}
+	else if(glfwGetKey(window,GLFW_KEY_D) == GLFW_PRESS){
+		if(myX >= -30.0f) myX -= speed;
+	}
 }
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
@@ -273,6 +290,7 @@ int main(){
 	printf("Now building this with seperate shader file . more managment needed.\n");
 	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
 	printf("Press E and Q to swap main texture\n");
+	printf("NOW you can walk (my implementation) WASD !!!\n");
 	printf("---------------------------------------------------------------------\n");
 
 	while(!glfwWindowShouldClose(mywin)){
@@ -280,25 +298,21 @@ int main(){
 		rate = change_texture(mywin,simpleShader_GLM,rate);
 		setDiffuse(mywin,main2_texture);
 		setDiffuse2(mywin,main_texture);
+		walkAround(mywin,0.003f);
+
 
 		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
 		simpleShader_GLM.use();
 
-        mat4 view = mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        float radius = 25.0f;
-        float camX   = sin(glfwGetTime()/2.0) * radius ;
-        float camZ   = cos(glfwGetTime()/2.0) * radius ;
-        view = lookAt(vec3(camX,5.0f,camZ),vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 3.0f, 0.0f));
-		//view = rotate(view,radians(-180.0f),vec3(0.0f,1.0f,0.0f));
+        mat4 view = mat4(1.0f); // set starting point
+        view = lookAt(vec3(myX,myY,myZ),vec3(myX, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
         simpleShader_GLM.setTransform("view",value_ptr(view));
 
 		for(int i =0;i<87;i++){
 			mat4 model = mat4(1.0f);
             model = translate(model, allCube[i]);
-			model = translate(model,vec3(10.0f,-1.0f,0.0f));
-			//model = rotate(model,radians(20.0f),vec3(1.0f,0.0f,0.0f));
             simpleShader_GLM.setTransform("model",value_ptr(model));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
