@@ -15,6 +15,7 @@
 - first 3D cube with static control (left,right)
 - create camera (using model,view,projection matrix)
 - using mouse and keyboard to move around (by doing some calculation with matrix and vector)
+- let there be light !
 
 ### Library used
 

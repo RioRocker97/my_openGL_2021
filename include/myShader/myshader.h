@@ -99,6 +99,9 @@ public:
     void setTransform(const std::string &name,const GLfloat* value){
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()),1,GL_FALSE,value);
     }
+    void setVec3(const std::string &name,GLfloat val1,GLfloat val2,GLfloat val3){
+        glUniform3f(glGetUniformLocation(ID, name.c_str()),val1,val2,val3);
+    }
     void destroy()
     {
         glDeleteProgram(ID);

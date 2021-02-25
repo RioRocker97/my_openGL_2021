@@ -14,9 +14,10 @@ class myCamera {
         vec3 POS;
         vec3 FRONT;
         vec3 UP;
+        
         mat4 VIEW;
-
         mat4 PROJECTION;
+
         float width;
         float height;
         bool firstMouse = true;
@@ -89,6 +90,8 @@ class myCamera {
         vec3 getPOS(){return POS;}
         vec3 getFRONT(){return FRONT;}
         vec3 getUP(){return UP;}
+        mat4 getVIEW(){return VIEW;}
+        mat4 getPROJECT(){return PROJECTION;}
         float getFOV(){return fov;}
         void setPOS(vec3 x){POS = x;}
         void setFRONT(vec3 x){FRONT = x;}

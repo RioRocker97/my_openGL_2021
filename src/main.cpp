@@ -21,7 +21,7 @@ using namespace glm;
 //vec3 cameraFront = vec3(0.0f, 0.0f, 1.0f);
 //vec3 cameraUp    = vec3(0.0f, 1.0f, 0.0f); //only adjust Y coz it UP
 //moving projection and view vector into camera class
-myCamera cam1 = myCamera(5.0f, 0.0f,-20.0f);
+myCamera cam1 = myCamera(5.0f, 0.0f,-10.0f);
 
 int myCamera::id = 0;
 
@@ -80,45 +80,12 @@ void walkAround(GLFWwindow *window){
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {	
 	cam1.moveMyCamera(xpos,ypos,0.6f);
-	/*
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-		firstMouse = false;
-    }
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-    lastX = xpos;
-    lastY = ypos;
-
-    float sensitivity = 0.8f; // change this value to your liking
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    rotateY += xoffset;
-    rotateZ += yoffset;
-
-    // make sure that when rotateZ is out of bounds, screen doesn't get flipped
-    if (rotateZ > 89.0f)
-        rotateZ = 89.0f;
-    if (rotateZ < -89.0f)
-        rotateZ = -89.0f;
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(rotateY)) * cos(glm::radians(rotateZ));
-    front.y = sin(glm::radians(rotateZ));
-    front.z = cos(glm::radians(rotateZ)) * sin(glm::radians(rotateY));
-    cameraFront = glm::normalize(front);
-	*/
-
 }
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	cam1.setFOV(cam1.getFOV()-yoffset);
 }
 int main(){
-	//initilize GLFW window with minimal openGL 3.0 version
 	glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -131,67 +98,61 @@ int main(){
 		return -1;
 	}
 	glfwMakeContextCurrent(mywin);
-
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
 		printf("Can't create GLAD");
 		return -1;
 	}
 
-	// mouse and scroll callback
 	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);
 	glfwSetCursorPosCallback(mywin, mouse_callback);
     glfwSetScrollCallback(mywin, scroll_callback);
 	glfwSetInputMode(mywin, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	Shader simpleShader_GLM("simple_3D_space.vert","simple_3D_space.frag");
-	// loading image texture using my own class
+	Shader realShader("real3D.vert","real3D.frag");
+	Shader mylight("real3D.vert","real3D_light.frag");
 
-	Texture2D main_texture("mytile.jpg",false);
-	Texture2D decal_texture("doge.png",true);
-	Texture2D main2_texture("colorful.jpg",false);
-	// real 3D cube
 	float mycube[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, // 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, // 1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,//  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, // 0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f, // 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, // 1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  //1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f, // 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
 
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, // 1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f, // 1.0f, 0.0f,
+		0.5f, -0.5f,  0.5f, // 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f, // 0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, // 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, // 0.0f, 1.0f
 	};
 	vec3 allCube[] = {
 		//C
@@ -209,161 +170,74 @@ int main(){
 		vec3( 2.2f,  5.5f,  0.0f),
 		vec3( 1.1f,  5.5f,  0.0f),
 		vec3( 0.0f,  5.5f,  0.0f),
-		//H
-		vec3(-2.0f,0.0f,0.0f),
-		vec3(-2.0f,1.1f,0.0f),
-		vec3(-2.0f,2.2f,0.0f),
-		vec3(-2.0f,3.3f,0.0f),
-		vec3(-2.0f,4.4f,0.0f),
-		vec3(-2.0f,5.5f,0.0f),
-
-		vec3(-3.1f,3.0f,0.0f),
-		vec3(-4.2f,3.0f,0.0f),
-		vec3(-5.2f,3.0f,0.0f),
-
-		vec3(-6.3f,0.0f,0.0f),
-		vec3(-6.3f,1.1f,0.0f),
-		vec3(-6.3f,2.2f,0.0f),
-		vec3(-6.3f,3.3f,0.0f),
-		vec3(-6.3f,4.4f,0.0f),
-		vec3(-6.3f,5.5f,0.0f),
-		//A
-		vec3(-7.5f,0.0f,0.0f),
-		vec3(-7.5f,1.1f,0.0f),
-		vec3(-7.5f,2.2f,0.0f),
-		vec3(-7.5f,3.3f,0.0f),
-		vec3(-7.5f,4.4f,0.0f),
-		vec3(-7.5f,5.5f,0.0f),
-
-		vec3(-8.6f,5.5f,0.0f),
-		vec3(-9.7f,5.5f,0.0f),
-		vec3(-10.8f,5.5f,0.0f),
-
-		vec3(-8.6f,3.0f,0.0f),
-		vec3(-9.7f,3.0f,0.0f),
-		vec3(-10.8f,3.0f,0.0f),
-
-		vec3(-11.9f,5.5f,0.0f),
-		vec3(-11.9f,4.4f,0.0f),
-		vec3(-11.9f,3.3f,0.0f),
-		vec3(-11.9f,2.2f,0.0f),
-		vec3(-11.9f,1.1f,0.0f),
-		vec3(-11.9f,0.0f,0.0f),
-		//N
-		vec3(-14.0f,0.0f,0.0f),
-		vec3(-14.0f,1.1f,0.0f),
-		vec3(-14.0f,2.2f,0.0f),
-		vec3(-14.0f,3.3f,0.0f),
-		vec3(-14.0f,4.4f,0.0f),
-		vec3(-14.0f,5.5f,0.0f),
-
-		vec3(-15.1f,4.0f,0.0f),
-		vec3(-16.2f,3.0f,0.0f),
-		vec3(-17.3f,2.0f,0.0f),
-		vec3(-18.4f,1.0f,0.0f),
-		vec3(-19.5f,0.0f,0.0f),
-
-		vec3(-20.6f,0.0f,0.0f),
-		vec3(-20.6f,1.1f,0.0f),
-		vec3(-20.6f,2.2f,0.0f),
-		vec3(-20.6f,3.3f,0.0f),
-		vec3(-20.6f,4.4f,0.0f),
-		vec3(-20.6f,5.5f,0.0f),
-		//G
-		vec3(-22.2f,0.0f,0.0f),
-		vec3(-22.2f,1.1f,0.0f),
-		vec3(-22.2f,2.2f,0.0f),
-		vec3(-22.2f,3.3f,0.0f),
-		vec3(-22.2f,4.4f,0.0f),
-		vec3(-22.2f,5.5f,0.0f),
-
-		vec3(-23.3f,5.5f,0.0f),
-		vec3(-24.4f,5.5f,0.0f),
-		vec3(-25.5f,5.5f,0.0f),
-		vec3(-26.6f,5.5f,0.0f),
-		vec3(-27.7f,5.5f,0.0f),
-
-		vec3(-23.3f,0.0f,0.0f),
-		vec3(-24.4f,0.0f,0.0f),
-		vec3(-25.5f,0.0f,0.0f),
-		vec3(-26.6f,0.0f,0.0f),
-		vec3(-27.7f,0.0f,0.0f),
-
-		vec3(-27.7f,1.1f,0.0f),
-		vec3(-27.7f,2.2f,0.0f),
-		vec3(-27.7f,3.3f,0.0f),
-
-		vec3(-26.6f,3.3f,0.0f),
-		vec3(-25.5f,3.3f,0.0f),
-		vec3(-24.4f,3.3f,0.0f),
-		vec3(-24.4f,2.2f,0.0f),
 		// test mouse
-		vec3(0.0f,0.0f,-30.0f)
+		vec3(0.0f,0.0f,-20.0f)
 	};
-	/* VBO = vertices Buffer Object . for storing vertice info to GPU buffer
-	VA0 = vertics Array Object . for sotring vertice info newly created
-	EBO =Elemental Buffer Object . for combining VBO into a new shape
-	*/
-	unsigned int VBO,VAO;
+	vec3 lightCube[] = {
+		vec3(0.0f,1.0f,-5.0f),
+		vec3(2.0f,3.0f,-5.0f),
+	};
+	unsigned int VBO,VAO,lightVAO;
+	// VAO for object
 	glGenVertexArrays(1,&VAO);
 	glGenBuffers(1,&VBO);
-
 	glBindVertexArray(VAO);
-
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
 	glBufferData(GL_ARRAY_BUFFER,sizeof(mycube),mycube,GL_STATIC_DRAW);
-
-
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)0);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,5*sizeof(float),(void*)(3*sizeof(float)));
-	glEnableVertexAttribArray(1);
+	//VAO for light
+	glGenVertexArrays(1,&lightVAO);
+	glBindVertexArray(lightVAO);
+	glBindBuffer(GL_ARRAY_BUFFER,VBO);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	glEnableVertexAttribArray(0);
 
-	simpleShader_GLM.use(); // put shader program before modify any uniform value
-
-	// set texture 
-	simpleShader_GLM.setInt("myTexture1",0);
-	simpleShader_GLM.setInt("myTexture2",1);
-	float rate = 0.01f;
-	simpleShader_GLM.setFloat("blending_rate",rate);
-
-	main_texture.myactivate(0);
-	decal_texture.myactivate(1);
-
-	//using GLM to set model,view,projection vector
-
+	realShader.use(); // put shader program before modify any uniform value
 	glEnable(GL_DEPTH_TEST);
 
 	printf("---------------------------------------------------------------------\n");
 	printf("Now building this with seperate shader file.\n");
 	printf("Using camera class for easy management.\n");
-	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
 	printf("There are %i camera in this world\n",myCamera::getNoCam());
-	printf("Press E and Q to swap main texture\n");
 	printf("NOW you can walk (tutorial implementation) WASD !!!\n");
 	printf("---------------------------------------------------------------------\n");
 	
 	cam1.makeMyProjection((float)MY_WIDTH,(float)MY_HEIGHT,55.0f);
-	//cam1.CameraOn(simpleShader_GLM);
+	//cam1.CameraOn(realShader);
 
 	while(!glfwWindowShouldClose(mywin)){ 
 		processInput(mywin);
-		rate = change_texture(mywin,simpleShader_GLM,rate);
-		setDiffuse(mywin,main2_texture);
-		setDiffuse2(mywin,main_texture);
 		walkAround(mywin);
 
-		glClearColor((float)42/255,(float)229/255,(float)217/255,1.0f);
+		glClearColor(0.1f,0.1f,0.1f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-		simpleShader_GLM.use();
-
-		cam1.CameraOn(simpleShader_GLM);
-
-		for(int i =0;i<88;i++){
+		// Set object shader
+		realShader.use();
+		realShader.setVec3("objColor",0.27f,0.72f,1.0f);
+		realShader.setVec3("lightColor",1.0f,1.0f,1.0f);
+		cam1.CameraOn(realShader);
+		glBindVertexArray(VAO);
+		for(int i =0;i<15;i++){
 			mat4 model = mat4(1.0f);
             model = translate(model, allCube[i]);
-            simpleShader_GLM.setTransform("model",value_ptr(model));
+            realShader.setTransform("model",value_ptr(model));
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
+		//set light shader
+		mylight.use();
+		mylight.setVec3("lightSource",1.0f,1.0f,1.0f);
+		mylight.setTransform("projection",value_ptr(cam1.getPROJECT()));
+		mylight.setTransform("view",value_ptr(cam1.getVIEW()));
+		glBindVertexArray(lightVAO);
+		for(int i =0;i<2;i++){
+			mat4 model = mat4(1.0f);
+            model = translate(model, lightCube[i]);
+			model = scale(model,vec3(0.5f));
+            mylight.setTransform("model",value_ptr(model));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
@@ -372,8 +246,11 @@ int main(){
     	glfwPollEvents();    
 	}
 	glDeleteVertexArrays(1,&VAO);
+	glDeleteVertexArrays(1,&lightVAO);
 	glDeleteBuffers(1,&VBO);
-	simpleShader_GLM.destroy();
+
+	realShader.destroy();
+	mylight.destroy();
 
 	glfwTerminate();
 	return 0;
