@@ -10,22 +10,20 @@
 
 #include <myShader/myshader.h>
 #include <myShader/mytexture.h>
+#include <myShader/mycamera.h>
 
 #define MY_WIDTH 1280
 #define MY_HEIGHT 720
 
 using namespace glm;
 
-vec3 cameraPos   = vec3(5.0f, 0.0f,  -20.0f);
-vec3 cameraFront = vec3(0.0f, 0.0f, 1.0f);
-vec3 cameraUp    = vec3(0.0f, 1.0f, 0.0f); //only adjust Y coz it UP
+//vec3 cameraPos   = vec3(5.0f, 0.0f,  -20.0f);
+//vec3 cameraFront = vec3(0.0f, 0.0f, 1.0f);
+//vec3 cameraUp    = vec3(0.0f, 1.0f, 0.0f); //only adjust Y coz it UP
+//moving projection and view vector into camera class
+myCamera cam1 = myCamera(5.0f, 0.0f,-20.0f);
 
-bool firstMouse = true;
-float rotateY   = 90.0f;	// rotateY is initialized to -90.0 degrees since a rotateY of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
-float rotateZ =  0.0f;
-float lastX =  1280.0/ 2.0;
-float lastY =  720.0 / 2.0;
-float fov   =  55.0f;
+int myCamera::id = 0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -65,6 +63,9 @@ void setDiffuse2(GLFWwindow *window,Texture2D text){
 	if(glfwGetKey(window,GLFW_KEY_Q) == GLFW_PRESS)text.myactivate(0);
 }
 void walkAround(GLFWwindow *window){
+	vec3 cameraPos = cam1.getPOS();
+	vec3 cameraFront = cam1.getFRONT();
+	vec3 cameraUp = cam1.getUP();
     float cameraSpeed = 0.001f; 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
@@ -74,9 +75,12 @@ void walkAround(GLFWwindow *window){
         cameraPos -= normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += normalize(cross(cameraFront, cameraUp)) * cameraSpeed;
+	cam1.setPOS(cameraPos);
 }
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
+{	
+	cam1.moveMyCamera(xpos,ypos,0.6f);
+	/*
     if (firstMouse)
     {
         lastX = xpos;
@@ -106,15 +110,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     front.y = sin(glm::radians(rotateZ));
     front.z = cos(glm::radians(rotateZ)) * sin(glm::radians(rotateY));
     cameraFront = glm::normalize(front);
+	*/
 
 }
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    fov -= (float)yoffset;
-    if (fov < 1.0f)
-        fov = 1.0f;
-    if (fov > 55.0f)
-        fov = 55.0f;
+	cam1.setFOV(cam1.getFOV()-yoffset);
 }
 int main(){
 	//initilize GLFW window with minimal openGL 3.0 version
@@ -138,9 +139,8 @@ int main(){
 
 	// mouse and scroll callback
 	glfwSetFramebufferSizeCallback(mywin, framebuffer_size_callback);
-    glfwSetCursorPosCallback(mywin, mouse_callback);
+	glfwSetCursorPosCallback(mywin, mouse_callback);
     glfwSetScrollCallback(mywin, scroll_callback);
-
 	glfwSetInputMode(mywin, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Shader simpleShader_GLM("simple_3D_space.vert","simple_3D_space.frag");
@@ -335,11 +335,16 @@ int main(){
 	glEnable(GL_DEPTH_TEST);
 
 	printf("---------------------------------------------------------------------\n");
-	printf("Now building this with seperate shader file . more managment needed.\n");
+	printf("Now building this with seperate shader file.\n");
+	printf("Using camera class for easy management.\n");
 	printf("Press UP for decal blend in . Press Down for decal blend out.\n");
+	printf("There are %i camera in this world\n",myCamera::getNoCam());
 	printf("Press E and Q to swap main texture\n");
 	printf("NOW you can walk (tutorial implementation) WASD !!!\n");
 	printf("---------------------------------------------------------------------\n");
+	
+	cam1.makeMyProjection((float)MY_WIDTH,(float)MY_HEIGHT,55.0f);
+	//cam1.CameraOn(simpleShader_GLM);
 
 	while(!glfwWindowShouldClose(mywin)){ 
 		processInput(mywin);
@@ -353,10 +358,7 @@ int main(){
 
 		simpleShader_GLM.use();
 
-		mat4 project = perspective(radians(fov),(float)MY_WIDTH /(float)MY_HEIGHT,0.1f,100.0f);
-		simpleShader_GLM.setTransform("projection",value_ptr(project));
-        mat4 view = lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        simpleShader_GLM.setTransform("view",value_ptr(view));
+		cam1.CameraOn(simpleShader_GLM);
 
 		for(int i =0;i<88;i++){
 			mat4 model = mat4(1.0f);

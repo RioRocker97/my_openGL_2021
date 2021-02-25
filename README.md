@@ -23,3 +23,4 @@
 ### my own header
 
 - mytexture.h for storing GLtexture (simple 2D image texture)
+- mycamera.h for creating camera in 3d world
