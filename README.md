@@ -16,7 +16,7 @@
 - create camera (using model,view,projection matrix)
 - using mouse and keyboard to move around (by doing some calculation with matrix and vector)
 - let there be light !
-
+- first implement of Phong's shader (still buggy)
 ### Library used
 
 - GLM , GLAD , GLFW 

@@ -108,52 +108,52 @@ int main(){
     glfwSetScrollCallback(mywin, scroll_callback);
 	glfwSetInputMode(mywin, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	Shader realShader("real3D.vert","real3D.frag");
+	Shader realShader("real3D_Phong.vert","real3D_Phong.frag");
 	Shader mylight("real3D.vert","real3D_light.frag");
 
-	float mycube[] = {
-		-0.5f, -0.5f, -0.5f, // 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, // 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,//  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, // 0.0f, 0.0f,
+    float mycube_phong[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f, // 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, // 1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  //1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f, // 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-		-0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f, // 0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f, // 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, // 1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f, // 1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f, // 1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f, // 0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f, // 1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f, // 1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, // 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, // 0.0f, 1.0f
-	};
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    };
 	vec3 allCube[] = {
 		//C
 		vec3( 0.0f,  0.0f,  0.0f),
@@ -173,24 +173,23 @@ int main(){
 		// test mouse
 		vec3(0.0f,0.0f,-20.0f)
 	};
-	vec3 lightCube[] = {
-		vec3(0.0f,1.0f,-5.0f),
-		vec3(2.0f,3.0f,-5.0f),
-	};
 	unsigned int VBO,VAO,lightVAO;
 	// VAO for object
 	glGenVertexArrays(1,&VAO);
 	glGenBuffers(1,&VBO);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
-	glBufferData(GL_ARRAY_BUFFER,sizeof(mycube),mycube,GL_STATIC_DRAW);
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(mycube_phong),mycube_phong,GL_STATIC_DRAW);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
+	//another attribute for object's normal
+	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
 	//VAO for light
 	glGenVertexArrays(1,&lightVAO);
 	glBindVertexArray(lightVAO);
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
 
 	realShader.use(); // put shader program before modify any uniform value
@@ -213,31 +212,33 @@ int main(){
 		glClearColor(0.1f,0.1f,0.1f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-		// Set object shader
-		realShader.use();
-		realShader.setVec3("objColor",0.27f,0.72f,1.0f);
-		realShader.setVec3("lightColor",1.0f,1.0f,1.0f);
-		cam1.CameraOn(realShader);
-		glBindVertexArray(VAO);
-		for(int i =0;i<15;i++){
-			mat4 model = mat4(1.0f);
-            model = translate(model, allCube[i]);
-            realShader.setTransform("model",value_ptr(model));
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
 		//set light shader
 		mylight.use();
 		mylight.setVec3("lightSource",1.0f,1.0f,1.0f);
 		mylight.setTransform("projection",value_ptr(cam1.getPROJECT()));
 		mylight.setTransform("view",value_ptr(cam1.getVIEW()));
 		glBindVertexArray(lightVAO);
-		for(int i =0;i<2;i++){
+
+		//set single light source
+		mat4 model = mat4(1.0f);
+		vec3 lightCube = vec3(2.0f,3.0f,-3.0f);
+		model = translate(model, lightCube);
+		model = scale(model,vec3(0.8f));
+		mylight.setTransform("model",value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// Set object shader
+		realShader.use();
+		realShader.setVec3("objColor",0.27f,0.72f,1.0f);
+		realShader.setVec3("lightColor",1.0f,1.0f,1.0f);
+		realShader.setVec3("lightPos",lightCube.x,lightCube.y,-lightCube.z); //light source location at z axis seem to be my own bug . have to use negative value of it.
+		realShader.setVec3("viewPos",cam1.getPOS().x,cam1.getPOS().y,cam1.getPOS().z); //specular here look out of place . might need to look over about vector operation again.
+		cam1.CameraOn(realShader);
+		glBindVertexArray(VAO);
+		for(int i =0;i<15;i++){
 			mat4 model = mat4(1.0f);
-            model = translate(model, lightCube[i]);
-			model = scale(model,vec3(0.5f));
-            mylight.setTransform("model",value_ptr(model));
+            model = translate(model, allCube[i]);
+            realShader.setTransform("model",value_ptr(model));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
