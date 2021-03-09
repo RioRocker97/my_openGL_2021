@@ -17,12 +17,7 @@
 
 using namespace glm;
 
-//vec3 cameraPos   = vec3(5.0f, 0.0f,  -20.0f);
-//vec3 cameraFront = vec3(0.0f, 0.0f, 1.0f);
-//vec3 cameraUp    = vec3(0.0f, 1.0f, 0.0f); //only adjust Y coz it UP
-//moving projection and view vector into camera class
 myCamera cam1 = myCamera(5.0f, 0.0f,-10.0f);
-
 int myCamera::id = 0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
@@ -32,35 +27,6 @@ void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-float change_texture(GLFWwindow *window,Shader shader,float rate){
-	if(glfwGetKey(window,GLFW_KEY_UP) == GLFW_PRESS){
-		if(rate <1.0f){
-			rate+= 0.0001f; //system respond to key so fast that it have to change with very very small amount.
-			shader.setFloat("blending_rate",rate);
-		}
-		else{
-			rate = 1.0f;
-			shader.setFloat("blending_rate",1.0f);
-		}
-	}
-	if(glfwGetKey(window,GLFW_KEY_DOWN) == GLFW_PRESS){
-		if(rate >0.0f){
-			rate-=0.0001f;
-			shader.setFloat("blending_rate",rate);
-		}
-		else{
-			rate = 0.0f;
-			shader.setFloat("blending_rate",0.0f);
-		}
-	}
-	return rate;
-}
-void setDiffuse(GLFWwindow *window,Texture2D text){
-	if(glfwGetKey(window,GLFW_KEY_E) == GLFW_PRESS)text.myactivate(0);
-}
-void setDiffuse2(GLFWwindow *window,Texture2D text){
-	if(glfwGetKey(window,GLFW_KEY_Q) == GLFW_PRESS)text.myactivate(0);
 }
 void walkAround(GLFWwindow *window){
 	vec3 cameraPos = cam1.getPOS();
@@ -113,6 +79,8 @@ int main(){
 
 	Texture2D myBox("box.jpg",false);
 	Texture2D myBox2("box_spec.jpg",false);
+	Texture2D myPlane("floor.jpg",false);
+	Texture2D myPlane2("floor_spec.jpg",false);
 
     float mycube_phong[] = {
 		//Verticle			  //Normal				//Texture
@@ -158,6 +126,14 @@ int main(){
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
+	float myplane_phong[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+	};
 	vec3 allCube[] = {
 		//C
 		vec3( 0.0f,  0.0f,  0.0f),
@@ -177,7 +153,7 @@ int main(){
 		// test mouse
 		vec3(0.0f,0.0f,-20.0f)
 	};
-	unsigned int VBO,VAO,lightVAO;
+	unsigned int VBO,VAO,lightVAO,planeVAO;
 	// VAO for object
 	glGenVertexArrays(1,&VAO);
 	glGenBuffers(1,&VBO);
@@ -197,6 +173,19 @@ int main(){
 	glBindBuffer(GL_ARRAY_BUFFER,VBO);
 	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)0);
 	glEnableVertexAttribArray(0);
+	//VAO for plane
+	glGenVertexArrays(1,&planeVAO);
+	glGenBuffers(1,&VBO);
+	glBindVertexArray(planeVAO);
+	glBindBuffer(GL_ARRAY_BUFFER,VBO);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(myplane_phong),myplane_phong,GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6*sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	realShader.use(); // put shader program before modify any uniform value
 	glEnable(GL_DEPTH_TEST);
@@ -210,9 +199,7 @@ int main(){
 	
 	cam1.makeMyProjection((float)MY_WIDTH,(float)MY_HEIGHT,55.0f);
 	//cam1.CameraOn(realShader);
-
-	myBox.myactivate(0);
-	myBox2.myactivate(1);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while(!glfwWindowShouldClose(mywin)){ 
 		processInput(mywin);
@@ -238,6 +225,8 @@ int main(){
 
 		// Set object shader
 		realShader.use();
+		myBox.myactivate(0);
+		myBox2.myactivate(1);
 		//realShader.setVec3("objColor",0.27f,0.72f,1.0f);
 		realShader.setInt("myMat.diffuse",0);
 		realShader.setInt("myMat.specular",1);
@@ -248,6 +237,7 @@ int main(){
 		realShader.setVec3("viewPos",cam1.getPOS().x,cam1.getPOS().y,cam1.getPOS().z); //specular here look out of place . might need to look over about vector operation again.
 		cam1.CameraOn(realShader);
 		glBindVertexArray(VAO);
+
 		for(int i =0;i<15;i++){
 			mat4 model = mat4(1.0f);
             model = translate(model, allCube[i]);
@@ -256,10 +246,22 @@ int main(){
             glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		realShader.setFloat("myMat.shininess",64.0f);
+		myPlane.myactivate(0);
+		myPlane2.myactivate(1);
+		glBindVertexArray(planeVAO);
+
+		model = mat4(1.0f);
+		model = scale(model,vec3(10.0f));
+		model = translate(model,vec3(0.0f,-0.55f,0.0f));
+		realShader.setTransform("model",value_ptr(model));
+		glDrawArrays(GL_TRIANGLES,0,6);
+
     	glfwSwapBuffers(mywin);
     	glfwPollEvents();    
 	}
 	glDeleteVertexArrays(1,&VAO);
+	glDeleteVertexArrays(1,&planeVAO);
 	glDeleteVertexArrays(1,&lightVAO);
 	glDeleteBuffers(1,&VBO);
 
