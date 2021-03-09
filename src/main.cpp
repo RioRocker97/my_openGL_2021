@@ -57,7 +57,7 @@ int main(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
 
-	GLFWwindow* mywin = glfwCreateWindow(MY_WIDTH,MY_HEIGHT,"CHANG window",NULL,NULL); //window area
+	GLFWwindow* mywin = glfwCreateWindow(MY_WIDTH,MY_HEIGHT,"Chang's Sandbox",NULL,NULL); //window area
 	if(mywin == NULL){
 		printf("Can't create GLFW window");
 		glfwTerminate();
@@ -81,6 +81,8 @@ int main(){
 	Texture2D myBox2("box_spec.jpg",false);
 	Texture2D myPlane("floor.jpg",false);
 	Texture2D myPlane2("floor_spec.jpg",false);
+	Texture2D animateMe("cloth.jpg",false);
+	Texture2D animateMe2("cloth_spec.jpg",false);
 
     float mycube_phong[] = {
 		//Verticle			  //Normal				//Texture
@@ -153,7 +155,7 @@ int main(){
 		// test mouse
 		vec3(0.0f,0.0f,-20.0f)
 	};
-	unsigned int VBO,VAO,lightVAO,planeVAO;
+	unsigned int VBO,VAO,lightVAO,planeVAO,animateVAO;
 	// VAO for object
 	glGenVertexArrays(1,&VAO);
 	glGenBuffers(1,&VBO);
@@ -186,6 +188,19 @@ int main(){
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6*sizeof(float)));
 	glEnableVertexAttribArray(2);
+	// VAO for my first animation
+	glGenVertexArrays(1,&animateVAO);
+	glGenBuffers(1,&VBO);
+	glBindVertexArray(animateVAO);
+	glBindBuffer(GL_ARRAY_BUFFER,VBO);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(mycube_phong),mycube_phong,GL_DYNAMIC_DRAW);
+
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(3*sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6*sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	realShader.use(); // put shader program before modify any uniform value
 	glEnable(GL_DEPTH_TEST);
@@ -200,7 +215,8 @@ int main(){
 	cam1.makeMyProjection((float)MY_WIDTH,(float)MY_HEIGHT,55.0f);
 	//cam1.CameraOn(realShader);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+	vec3 mypath = vec3(-3.0f,0.0f,0.0f);
+	bool goback = false;
 	while(!glfwWindowShouldClose(mywin)){ 
 		processInput(mywin);
 		walkAround(mywin);
@@ -245,7 +261,7 @@ int main(){
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
+		//floor
 		realShader.setFloat("myMat.shininess",64.0f);
 		myPlane.myactivate(0);
 		myPlane2.myactivate(1);
@@ -257,11 +273,31 @@ int main(){
 		realShader.setTransform("model",value_ptr(model));
 		glDrawArrays(GL_TRIANGLES,0,6);
 
+		//box animation
+		realShader.setFloat("myMat.shininess",64.0f);
+		animateMe.myactivate(0);
+		animateMe2.myactivate(1);
+		glBindVertexArray(animateVAO);
+
+		model = mat4(1.0f);
+		model = translate(model,mypath);
+		if(goback){
+			if(mypath.z >= -4.0f) mypath.z -=0.001f;
+			else goback = false;
+		}
+		else{
+			if(mypath.z <= 4.0f) mypath.z +=0.001f;
+			else goback = true;
+		}
+		realShader.setTransform("model",value_ptr(model));
+		glDrawArrays(GL_TRIANGLES,0,36);
+
     	glfwSwapBuffers(mywin);
     	glfwPollEvents();    
 	}
 	glDeleteVertexArrays(1,&VAO);
 	glDeleteVertexArrays(1,&planeVAO);
+	glDeleteVertexArrays(1,&animateVAO);
 	glDeleteVertexArrays(1,&lightVAO);
 	glDeleteBuffers(1,&VBO);
 

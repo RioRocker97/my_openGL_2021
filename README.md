@@ -18,6 +18,7 @@
 - let there be light !
 - first implement of Phong's shader (still buggy . light is static )
 - now with texture ! (Diffuse and Specular map)
+- first animation ! (why will it "lag" whenever i changed shininess ?)
 ### Library used
 
 - GLM , GLAD , GLFW 
