@@ -235,7 +235,7 @@ int main(){
 		mat4 model = mat4(1.0f);
 		vec3 lightCube = vec3(2.0f,3.0f,-3.0f);
 		model = translate(model, lightCube);
-		model = scale(model,vec3(0.8f));
+		model = scale(model,vec3(0.3f));
 		mylight.setTransform("model",value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -248,8 +248,11 @@ int main(){
 		realShader.setInt("myMat.specular",1);
 		realShader.setFloat("myMat.shininess",8.0f);
 		//instead of define light struct . i just edit lightColor to be little darker .
-		realShader.setVec3("lightColor",0.6f,0.6f,0.6f);
-		realShader.setVec3("lightPos",lightCube.x,lightCube.y,-lightCube.z); //light on z axis have to be reversed . it's my own bug .
+		//realShader.setVec3("lightColor",0.6f,0.6f,0.6f);
+		//alright fine . building directional light source
+		realShader.setVec3("light.lightSource",0.6f,0.6f,0.6f);
+		realShader.setVec3("light.direction",0.0f,0.3f,0.5f);
+		//realShader.setVec3("lightPos",lightCube.x,lightCube.y,-lightCube.z); //light on z axis have to be reversed . it's my own bug .
 		realShader.setVec3("viewPos",cam1.getPOS().x,cam1.getPOS().y,cam1.getPOS().z); //specular here look out of place . might need to look over about vector operation again.
 		cam1.CameraOn(realShader);
 		glBindVertexArray(VAO);
