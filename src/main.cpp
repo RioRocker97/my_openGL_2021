@@ -74,7 +74,7 @@ int main(){
     glfwSetScrollCallback(mywin, scroll_callback);
 	glfwSetInputMode(mywin, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	Shader realShader("real3D_myPhong.vert","real3D_myPhong.frag");
+	Shader realShader("real3D_myPhong.vert","real3D_pointLight.frag");
 	Shader mylight("real3D.vert","real3D_light.frag");
 
 	Texture2D myBox("box.jpg",false);
@@ -153,7 +153,7 @@ int main(){
 		vec3( 1.1f,  5.5f,  0.0f),
 		vec3( 0.0f,  5.5f,  0.0f),
 		// test mouse
-		vec3(0.0f,0.0f,-20.0f)
+		//vec3(0.0f,0.0f,-20.0f)
 	};
 	unsigned int VBO,VAO,lightVAO,planeVAO,animateVAO;
 	// VAO for object
@@ -243,23 +243,38 @@ int main(){
 		realShader.use();
 		myBox.myactivate(0);
 		myBox2.myactivate(1);
-		//realShader.setVec3("objColor",0.27f,0.72f,1.0f);
 		realShader.setInt("myMat.diffuse",0);
 		realShader.setInt("myMat.specular",1);
 		realShader.setFloat("myMat.shininess",8.0f);
-		//instead of define light struct . i just edit lightColor to be little darker .
-		//realShader.setVec3("lightColor",0.6f,0.6f,0.6f);
-		//alright fine . building directional light source
-		realShader.setVec3("light.lightSource",0.6f,0.6f,0.6f);
-		realShader.setVec3("light.direction",0.0f,0.3f,0.5f);
-		//realShader.setVec3("lightPos",lightCube.x,lightCube.y,-lightCube.z); //light on z axis have to be reversed . it's my own bug .
+		realShader.setVec3("light.lightSource",1.0f,1.0f,1.0f);
+		realShader.setVec3("light.lightPosition",lightCube.x,lightCube.y,lightCube.z);
+		realShader.setFloat("light.constant",  1.0f); //set constant variable for using point light
+		realShader.setFloat("light.linear",    0.07f); //set constant variable for using point light
+		realShader.setFloat("light.quadratic", 0.017f);	//set constant variable for using point light
+		//see http://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation for more constant variable info
 		realShader.setVec3("viewPos",cam1.getPOS().x,cam1.getPOS().y,cam1.getPOS().z); //specular here look out of place . might need to look over about vector operation again.
 		cam1.CameraOn(realShader);
 		glBindVertexArray(VAO);
 
-		for(int i =0;i<15;i++){
+		for(int i =0;i<14;i++){
 			mat4 model = mat4(1.0f);
             model = translate(model, allCube[i]);
+            realShader.setTransform("model",value_ptr(model));
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		for(int i =0;i<14;i++){
+			mat4 model = mat4(1.0f);
+            model = translate(model, allCube[i]);
+			model = translate(model,vec3(0.0f,0.0f,4.0f));
+            realShader.setTransform("model",value_ptr(model));
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+		for(int i =0;i<14;i++){
+			mat4 model = mat4(1.0f);
+            model = translate(model, allCube[i]);
+			model = translate(model,vec3(0.0f,0.0f,8.0f));
             realShader.setTransform("model",value_ptr(model));
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -271,7 +286,7 @@ int main(){
 		glBindVertexArray(planeVAO);
 
 		model = mat4(1.0f);
-		model = scale(model,vec3(10.0f));
+		model = scale(model,vec3(15.0f));
 		model = translate(model,vec3(0.0f,-0.55f,0.0f));
 		realShader.setTransform("model",value_ptr(model));
 		glDrawArrays(GL_TRIANGLES,0,6);

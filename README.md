@@ -19,6 +19,7 @@
 - first implement of Phong's shader (still buggy . light is static )
 - now with texture ! (Diffuse and Specular map)
 - first animation ! (why will it "lag" whenever i changed shininess ?)
+- first realistic light (directional and point light)
 ### Library used
 
 - GLM , GLAD , GLFW 
@@ -28,5 +29,5 @@
 - mytexture.h for storing GLtexture (simple 2D image texture)
 - mycamera.h for creating camera in 3d world
 - myshader.h for shader program
-
+- **mylight.h for defining light simulation along with shader (proposed)
 - lots of GLSL in shader folder 
