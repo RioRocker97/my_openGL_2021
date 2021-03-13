@@ -30,4 +30,11 @@
 - mycamera.h for creating camera in 3d world
 - myshader.h for shader program
 - **mylight.h for defining light simulation along with shader (proposed)
+- **will be built newer and better header for Shader program , Light, Texture loading at realShader
+
 - lots of GLSL in shader folder 
+
+## Workspace
+
+- Moving all application to application.h for file management 
+- for now , don't edit main.cpp more often

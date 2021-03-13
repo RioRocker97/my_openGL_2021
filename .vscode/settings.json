@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.cpp": "cpp",
+        "*.frag": "glsl",
         "array": "cpp",
         "atomic": "cpp",
         "*.tcc": "cpp",
@@ -44,7 +45,17 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "cstring": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "iomanip": "cpp",
+        "ranges": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.errorSquiggles": "Enabled"
