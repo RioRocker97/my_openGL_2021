@@ -15,6 +15,8 @@ using namespace std;
 class Texture{
     private:
         unsigned int ID;
+        string type;
+        string path;
     public:
         static const char* MAIN_DIRECTORY;
         //only load image texture in .JPG format

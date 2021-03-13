@@ -11,6 +11,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
 
 #include <realShader/camera.h>
 #include <realShader/texture.h>
@@ -51,6 +54,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	cam1.setFOV(cam1.getFOV()-yoffset);
 }
 
+/* assimp function for loading model*/
+void processNode(aiNode *node, const aiScene *scene);
+void processMesh(aiMesh *mesh, const aiScene *scene);
+/*----------------------------*/
+
 int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -71,13 +79,25 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
     glfwSetScrollCallback(WIN_APP, scroll_callback);
 	glfwSetInputMode(WIN_APP, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    Shader::setDIR(WIN_PATH);
-    Shader basic("/resource/basic3.vert","/resource/basic3.frag");
-    Shader lightShader("/resource/simple.vert","/resource/simple.vert");
+    printf("%s\n",WIN_PATH);
+    Shader basic(WIN_PATH,"/resource/GLSL/basic3.vert","/resource/GLSL/basic3.frag");
+    Shader lightShader(WIN_PATH,"/resource/GLSL/simple.vert","/resource/GLSL/simple.frag");
 
+    /* try to understand Assimp 
+    Assimp::Importer importer;
+    string p = WIN_PATH;
+    p.append("/resource/objects/ball.obj");
+    const aiScene* scene = importer.ReadFile(p.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode){
+        printf("ERROR::ASSIMP:: %s",importer.GetErrorString());
+        return -1;
+    }
+    --------------- */
     printf("---------------------------------------------------------\n");
     printf("Hello My world !!!\n");
     printf("---------------------------------------------------------\n");
+    basic.use();
+    lightShader.use();
     while(!glfwWindowShouldClose(WIN_APP)){
         processInput(WIN_APP);
 

@@ -55,7 +55,8 @@
         "numeric": "cpp",
         "random": "cpp",
         "iomanip": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "map": "cpp"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.errorSquiggles": "Enabled"

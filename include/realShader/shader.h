@@ -12,9 +12,8 @@ class Shader
 {
 public:
     unsigned int ID;
-    static const char* MAIN_DIRECTORY;
     //Create shader program with Vertex and Fragment Shading Program
-    Shader(const char* vertexPath, const char* fragmentPath)
+    Shader(const char* MAIN_DIRECTORY,const char* vertexPath, const char* fragmentPath)
     {
         std::string full_path = MAIN_DIRECTORY;
         std::string vertexCode;
@@ -66,12 +65,10 @@ public:
         glAttachShader(ID, fragment);
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");
+        //std::cout << ID << "Shading Program Loaded !" << std::endl;
         // delete the shaders as they're linked into our program now and no longer necessary
         glDeleteShader(vertex);
         glDeleteShader(fragment);
-    }
-    static void setDIR(const char* dir){
-        MAIN_DIRECTORY = dir;
     }
     // activate the shader
     // ------------------------------------------------------------------------
