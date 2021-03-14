@@ -81,6 +81,7 @@ class SingleCamera {
 
         }
         static int getNoCam(){return id;}
+        // we need to rethink this function and MakeMyProjection .it doesn't make sense much and inefficient
         void CameraOn(Shader shade){
             VIEW = lookAt(POS,POS+FRONT,UP);
             PROJECTION = perspective(radians(fov),width/height,1.0f,100.0f);

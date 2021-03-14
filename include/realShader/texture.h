@@ -18,10 +18,9 @@ class Texture{
         string type;
         string path;
     public:
-        static const char* MAIN_DIRECTORY;
         //only load image texture in .JPG format
         //all image texture should be in /resource/texture
-        Texture(string filename){
+        Texture(const char* main_path,string filename){
             glGenTextures(1,&ID);
             glBindTexture(GL_TEXTURE_2D,ID);
 
@@ -31,7 +30,7 @@ class Texture{
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             stbi_set_flip_vertically_on_load(true);  
             
-            string full_path = MAIN_DIRECTORY;
+            string full_path = main_path;
             full_path.append(filename);
             int w,h,nr;
             unsigned char* texture_data = stbi_load(full_path.c_str(),&w,&h,&nr,0);

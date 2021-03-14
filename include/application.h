@@ -18,8 +18,9 @@
 #include <realShader/camera.h>
 #include <realShader/texture.h>
 #include <realShader/shader.h>
+#include <realShader/model.h>
 
-SingleCamera cam1 = SingleCamera(5.0f, 0.0f,-10.0f);
+SingleCamera cam1 = SingleCamera(0.0f,0.0f,-5.0f);
 int SingleCamera::id = 0;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -53,12 +54,20 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	cam1.setFOV(cam1.getFOV()-yoffset);
 }
-
-/* assimp function for loading model*/
-void processNode(aiNode *node, const aiScene *scene);
-void processMesh(aiMesh *mesh, const aiScene *scene);
-/*----------------------------*/
-
+void setup_world(Shader shader,SingleCamera cam,vec3 single_light){
+    shader.use();
+    shader.setTransform("projection",value_ptr(cam.getPROJECT()));
+    shader.setTransform("view",value_ptr(cam.getVIEW()));
+    shader.setInt("myMat.diffuse",0);
+    shader.setInt("myMat.specular",1);
+    shader.setFloat("myMat.shininess",8.0f);
+    shader.setVec3("light.lightSource",1.0f,1.0f,1.0f);
+    shader.setVec3("light.lightPosition",single_light.x,single_light.y,single_light.z);
+    shader.setFloat("light.constant",  1.0f);
+    shader.setFloat("light.linear",    0.07f);
+    shader.setFloat("light.quadratic", 0.017f);
+    shader.setVec3("viewPos",cam.getPOS().x,cam.getPOS().y,cam.getPOS().z);
+}
 int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -83,6 +92,12 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
     Shader basic(WIN_PATH,"/resource/GLSL/basic3.vert","/resource/GLSL/basic3.frag");
     Shader lightShader(WIN_PATH,"/resource/GLSL/simple.vert","/resource/GLSL/simple.frag");
 
+    Model myBall(WIN_PATH,"/resource/objects/ball.obj");
+    Model mySelf(WIN_PATH,"/resource/objects/me.obj");
+    Model myFloor(WIN_PATH,"/resource/objects/floor.obj");
+
+    Texture ball_dif(WIN_PATH,"/resource/texture/default.jpg");
+    Texture ball_spc(WIN_PATH,"/resource/texture/default_spec.jpg");
     /* try to understand Assimp 
     Assimp::Importer importer;
     string p = WIN_PATH;
@@ -92,17 +107,37 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
         printf("ERROR::ASSIMP:: %s",importer.GetErrorString());
         return -1;
     }
+    aiNode* node = scene->mRootNode;
+    printf("Num of Children : %i\n",node->mNumChildren);
+    printf("Num of current Node 's meshs : %i\n",scene->mNumMeshes);
     --------------- */
     printf("---------------------------------------------------------\n");
     printf("Hello My world !!!\n");
+    printf("We're in BUSINESS my bois !\n");
+    printf("If it successfully loaded, you will see basic shit and floor\n");
     printf("---------------------------------------------------------\n");
-    basic.use();
-    lightShader.use();
+    cam1.makeMyProjection((float)WIN_WIDTH,(float)WIN_HEIGHT,55.0f);
+    glEnable(GL_DEPTH_TEST);  
     while(!glfwWindowShouldClose(WIN_APP)){
         processInput(WIN_APP);
+        walkAround(WIN_APP);
 
-        glClearColor(0.6f,0.6f,0.6f,1.0f);
+        glClearColor(0.1f,0.1f,0.1f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+
+        vec3 lightPOS = vec3(0.0f,3.0f,0.0f);
+        ball_dif.use(0);
+        ball_spc.use(1);
+        setup_world(basic,cam1,lightPOS);
+
+        vec3 myBallPOS = vec3(1.0f,0.0f,0.0f);
+        myBall.render(basic,vec3(0.0f,3.0f,0.0f),true);
+        myBall.render(basic,myBallPOS,true);
+        myBall.render(basic,vec3(1.0f,0.0f,-5.0f),true);
+
+        mySelf.render(basic,vec3(3.0f,2.0f,0.0f),true);
+
+        myFloor.render(basic,vec3(0.0f,-1.0f,0.0f),true);
 
         glfwSwapBuffers(WIN_APP);
     	glfwPollEvents();   

@@ -35,9 +35,10 @@ class Mesh{
 
             BuildMesh();
         }
-        void render(Shader program,vec3 xyz){
+        void render(Shader program,vec3 xyz,bool isFilp){
             mat4 model = mat4(1.0f);
             model = translate(model,xyz);
+            if(isFilp)model = rotate(model,radians(180.0f),vec3(0.0f,0.0f,1.0f));
             program.setTransform("model",value_ptr(model));
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -52,10 +53,10 @@ class Mesh{
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER,VBO);
 
-            glBufferData(GL_ARRAY_BUFFER, verticles.size() * sizeof(Vertex), &verticles[0], GL_STATIC_DRAW);  
+            glBufferData(GL_ARRAY_BUFFER, verticles.size() * sizeof(Vertex), &verticles[0], GL_DYNAMIC_DRAW);  
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_DYNAMIC_DRAW);
 
             glEnableVertexAttribArray(0);	
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
