@@ -50,9 +50,9 @@ class Model{
             //load node from scene
             processNode(scene->mRootNode,scene);
         }
-        void render(Shader shader,vec3 xyz,bool isFlip){
+        void render(Shader shader,vec3 xyz){
             for(unsigned int i = 0; i < all_mesh.size(); i++)
-                all_mesh[i].render(shader,xyz,isFlip);
+                all_mesh[i].render(shader,xyz);
         }
     private:
         void processNode(aiNode* node,const aiScene* scene){

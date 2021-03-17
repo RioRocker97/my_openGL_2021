@@ -22,10 +22,16 @@
 - first realistic light (directional and point light)
 - load complex model using Assimp 
 - can now build 3d world !!!
+- can load simple diffuse and spec map based on Model's uv map
 
-### Library used
+## my 3D world progression
 
-- GLM , GLAD , GLFW , ASSIMP
+- 14/3/2021
+    - First 3d world is created ! (still lag and didn't optimize code . maybe should try re-write model class?)
+- 17/3/2021
+    - two possible source of laggy rendering is : either my shader program suck or camera movement is using too much computation
+    - try to use assimp as low as possible .(just use it to load vertex,normal,textcord)
+    - now seperate texture from assimp 's built in texture loader (might need somewhere to store all those texture data in some other class)
 
 ### my own header
 
@@ -35,16 +41,6 @@
 - **mylight.h for defining light simulation along with shader (proposed)
 - all essential already re-write in realShader
 - model.h and mesh.h for loading model using assimp (no texture loading implmentation)
-- ** should play around assimp for understanding how material loading work  
+- played around assimp for understanding how material loading work  
 
 - lots of GLSL in shader folder 
-
-## Workspace
-
-- Moving all application to application.h for file management 
-- for now , don't edit main.cpp more often
-
-## my 3D world progression
-
-- 14/3/2021
-    - First 3d world is created ! (still lag and didn't optimize code . maybe should try re-write model class?)

@@ -88,16 +88,18 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
     glfwSetScrollCallback(WIN_APP, scroll_callback);
 	glfwSetInputMode(WIN_APP, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    printf("%s\n",WIN_PATH);
     Shader basic(WIN_PATH,"/resource/GLSL/basic3.vert","/resource/GLSL/basic3.frag");
     Shader lightShader(WIN_PATH,"/resource/GLSL/simple.vert","/resource/GLSL/simple.frag");
 
     Model myBall(WIN_PATH,"/resource/objects/ball.obj");
     Model mySelf(WIN_PATH,"/resource/objects/me.obj");
     Model myFloor(WIN_PATH,"/resource/objects/floor.obj");
+    Model myMeat(WIN_PATH,"/resource/objects/cylinder.obj");
 
     Texture ball_dif(WIN_PATH,"/resource/texture/default.jpg");
     Texture ball_spc(WIN_PATH,"/resource/texture/default_spec.jpg");
+    Texture meat_dif(WIN_PATH,"/resource/texture/cylinder_dif.jpg");
+    Texture meat_spec(WIN_PATH,"/resource/texture/cylinder_spec.jpg");
     /* try to understand Assimp 
     Assimp::Importer importer;
     string p = WIN_PATH;
@@ -113,11 +115,12 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
     --------------- */
     printf("---------------------------------------------------------\n");
     printf("Hello My world !!!\n");
-    printf("We're in BUSINESS my bois !\n");
     printf("If it successfully loaded, you will see basic shit and floor\n");
     printf("---------------------------------------------------------\n");
     cam1.makeMyProjection((float)WIN_WIDTH,(float)WIN_HEIGHT,55.0f);
     glEnable(GL_DEPTH_TEST);  
+    //double start = glfwGetTime();
+    //unsigned int frame = 0;
     while(!glfwWindowShouldClose(WIN_APP)){
         processInput(WIN_APP);
         walkAround(WIN_APP);
@@ -125,19 +128,28 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
         glClearColor(0.1f,0.1f,0.1f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
+        /*
+        double end = glfwGetTime();
+        frame++;
+        if(end - start >= 1.0){
+            printf("%.2f FPS\n",frame/1000.0);
+            frame =0;
+            start+=1.0;
+        }
+        */
         vec3 lightPOS = vec3(0.0f,3.0f,0.0f);
         ball_dif.use(0);
         ball_spc.use(1);
         setup_world(basic,cam1,lightPOS);
 
         vec3 myBallPOS = vec3(1.0f,0.0f,0.0f);
-        myBall.render(basic,vec3(0.0f,3.0f,0.0f),true);
-        myBall.render(basic,myBallPOS,true);
-        myBall.render(basic,vec3(1.0f,0.0f,-5.0f),true);
+        myBall.render(basic,myBallPOS);
+        mySelf.render(basic,vec3(3.0f,2.0f,0.0f));
+        myFloor.render(basic,vec3(0.0f,-1.0f,0.0f));
 
-        mySelf.render(basic,vec3(3.0f,2.0f,0.0f),true);
-
-        myFloor.render(basic,vec3(0.0f,-1.0f,0.0f),true);
+        meat_dif.use(0);
+        meat_spec.use(1);
+        myMeat.render(basic,vec3(2.0f,1.0f,2.0f));
 
         glfwSwapBuffers(WIN_APP);
     	glfwPollEvents();   
