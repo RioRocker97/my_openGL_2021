@@ -30,11 +30,11 @@ void processInput(GLFWwindow *window)
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 }
-void walkAround(GLFWwindow *window){
+void walkAround(GLFWwindow *window,float compTime){
     vec3 cameraPos = cam1.getPOS();
 	vec3 cameraFront = cam1.getFRONT();
 	vec3 cameraUp = cam1.getUP();
-    float cameraSpeed = 0.001f; 
+    float cameraSpeed = 3.0f*compTime; 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -87,6 +87,7 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
 	glfwSetCursorPosCallback(WIN_APP, mouse_callback);
     glfwSetScrollCallback(WIN_APP, scroll_callback);
 	glfwSetInputMode(WIN_APP, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(WIN_APP, GLFW_STICKY_KEYS, GLFW_TRUE);
 
     Shader basic(WIN_PATH,"/resource/GLSL/basic3.vert","/resource/GLSL/basic3.frag");
     Shader lightShader(WIN_PATH,"/resource/GLSL/simple.vert","/resource/GLSL/simple.frag");
@@ -119,24 +120,18 @@ int myApp(GLFWwindow* WIN_APP,int WIN_WIDTH,int WIN_HEIGHT,const char* WIN_PATH)
     printf("---------------------------------------------------------\n");
     cam1.makeMyProjection((float)WIN_WIDTH,(float)WIN_HEIGHT,55.0f);
     glEnable(GL_DEPTH_TEST);  
-    //double start = glfwGetTime();
-    //unsigned int frame = 0;
+    
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(WIN_APP)){
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
         processInput(WIN_APP);
-        walkAround(WIN_APP);
+        walkAround(WIN_APP,deltaTime);
 
         glClearColor(0.1f,0.1f,0.1f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-
-        /*
-        double end = glfwGetTime();
-        frame++;
-        if(end - start >= 1.0){
-            printf("%.2f FPS\n",frame/1000.0);
-            frame =0;
-            start+=1.0;
-        }
-        */
         vec3 lightPOS = vec3(0.0f,3.0f,0.0f);
         ball_dif.use(0);
         ball_spc.use(1);

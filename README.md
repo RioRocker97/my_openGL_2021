@@ -1,4 +1,7 @@
-# Another OpenGL repo for studying computer graphic
+**### I discontiuned this side-project coz' i dont know what to do next . maybe i'll come back to re-open this IF i have another passion PUSH###**
+**Last followed Tutorial : [Depth Testing(around mid-March 2021)](https://learnopengl.com/Advanced-OpenGL/Depth-testing)**
+
+# my own study and research on computer graphic(Low-level programming) 
 
 - Could be useful when i start building my own game engine
 - might be a good start to look into OpenGL/ES/WebGL/Vulkan
